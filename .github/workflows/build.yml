@@ -59,7 +59,7 @@ jobs:
           target: ${{ matrix.target }}
           profile: minimal
           override: true
-      - name: rust-cache
+      - id: rust-cache
         uses: swatinem/rust-cache@v1
         with:
           key: "${{ matrix.target }}"
