@@ -62,7 +62,7 @@ jobs:
       - name: rust-cache
         uses: swatinem/rust-cache@v1
         with:
-          key: "${{ target }}"
+          key: "${{ matrix.target }}"
       - run: cargo install cross --version 0.2.1
         if: ${{ steps.rust-cache.outputs.cache-hit == false }}
       - run: cross build --release --target ${{ matrix.target }}
