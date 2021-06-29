@@ -1,0 +1,27 @@
+---
+on:
+  push:
+    branches:
+      - "**"
+    tags-ignore:
+      - "**.**.**"
+
+name: build
+
+jobs:
+  rustfmt:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          override: true
+          components: rustfmt
+
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
