@@ -80,7 +80,7 @@ async fn main() -> Result<()> {
                 .long("github-poll-interval")
                 .short("p")
                 .env("GH_POLL_INTERVAL")
-                .default_value("30"),
+                .default_value("300"),
         )
         .get_matches();
 
