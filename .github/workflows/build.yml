@@ -14,14 +14,28 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v2
-
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           override: true
           components: rustfmt
-
       - uses: actions-rs/cargo@v1
         with:
           command: fmt
           args: --all -- --check
+
+  clippy:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          override: true
+          components: clippy
+      - uses: swatinem/rust-cache@v1
+      - uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: --all-targets -- -D warnings
