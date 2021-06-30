@@ -2,6 +2,4 @@ FROM scratch
 
 COPY github-exporter /usr/bin/
 
-USER nobody
-
 CMD ["/usr/bin/github-exporter"]
