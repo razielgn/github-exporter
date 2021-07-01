@@ -1,5 +1,12 @@
-FROM scratch
+FROM alpine:latest as builder
 
 COPY github-exporter /usr/bin/
+
+RUN chmod +x /usr/bin/github-exporter
+
+
+FROM scratch
+
+COPY --from=builder /usr/bin/github-exporter /usr/bin/
 
 CMD ["/usr/bin/github-exporter"]
