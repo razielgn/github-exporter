@@ -87,8 +87,16 @@ async fn main() -> Result<()> {
     let bind_to = value_t!(matches, "bind", SocketAddr)?;
     let github_base_url = matches.value_of("github_base_url");
     let github_token = value_t!(matches, "github_token", String)?;
-    let github_repos = values_t!(matches, "github_repos", Repository)?;
-    let github_orgs = Arc::new(values_t!(matches, "github_orgs", Organisation)?);
+    let github_repos = if matches.occurrences_of("github_repos") > 0 {
+        values_t!(matches, "github_repos", Repository)?
+    } else {
+        Default::default()
+    };
+    let github_orgs = if matches.occurrences_of("github_orgs") > 0 {
+        Arc::new(values_t!(matches, "github_orgs", Organisation)?)
+    } else {
+        Default::default()
+    };
     let poll_interval = Duration::from_secs(value_t!(matches, "github_poll_interval", u64)?);
     let workflows_refresh_interval =
         Duration::from_secs(value_t!(matches, "github_workflows_refresh", u64)?);
