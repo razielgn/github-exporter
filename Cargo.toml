@@ -2,7 +2,7 @@
 name = "github-exporter"
 authors = ["Federico Ravasio <ravasio.federico@gmail.com>"]
 description = "Github exporter for Prometheus."
-version = "0.1.0"
+version = "0.2.0"
 edition = "2018"
 resolver = "2"
 
