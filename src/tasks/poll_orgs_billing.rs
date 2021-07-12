@@ -1,7 +1,8 @@
 use crate::types::{Organisation, MACOS, UBUNTU, WINDOWS};
 use lazy_static::lazy_static;
-use prometheus::{register_gauge_vec, register_int_gauge_vec, GaugeVec, IntGaugeVec};
+use prometheus::{register_gauge_vec, GaugeVec};
 use serde::Deserialize;
+use serde_with::{serde_as, DisplayFromStr};
 use std::{sync::Arc, time::Duration};
 use tokio::time;
 use tracing::{error, info};
@@ -111,22 +112,24 @@ fn set_metrics_shared_storage_billing(org: &str, shared_storage_billing: &Shared
         .set(shared_storage_billing.estimated_storage_for_month);
 }
 
+#[serde_as]
 #[derive(Debug, Deserialize)]
 pub struct ActionsBilling {
-    pub total_minutes_used: i64,
-    pub total_paid_minutes_used: i64,
-    pub included_minutes: i64,
+    pub total_minutes_used: f64,
+    #[serde_as(as = "DisplayFromStr")]
+    pub total_paid_minutes_used: f64,
+    pub included_minutes: f64,
     pub minutes_used_breakdown: MinutesUsedBreakdown,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct MinutesUsedBreakdown {
     #[serde(rename = "UBUNTU")]
-    pub ubuntu: Option<i64>,
+    pub ubuntu: Option<f64>,
     #[serde(rename = "MACOS")]
-    pub macos: Option<i64>,
+    pub macos: Option<f64>,
     #[serde(rename = "WINDOWS")]
-    pub windows: Option<i64>,
+    pub windows: Option<f64>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -138,38 +141,36 @@ pub struct PackagesBilling {
 
 #[derive(Debug, Deserialize)]
 pub struct SharedStorageBilling {
-    pub days_left_in_billing_cycle: i64,
+    pub days_left_in_billing_cycle: f64,
     pub estimated_paid_storage_for_month: f64,
     pub estimated_storage_for_month: f64,
 }
 
 lazy_static! {
-    pub static ref ORG_BILLING_ACTIONS_TOTAL_MINUTES_USED: IntGaugeVec = register_int_gauge_vec!(
+    pub static ref ORG_BILLING_ACTIONS_TOTAL_MINUTES_USED: GaugeVec = register_gauge_vec!(
         "github_org_billing_actions_total_minutes_used",
         "Github Actions organisation billing total minutes used",
         &["organisation"]
     )
     .unwrap();
-    pub static ref ORG_BILLING_ACTIONS_TOTAL_PAID_MINUTES_USED: IntGaugeVec =
-        register_int_gauge_vec!(
-            "github_org_billing_actions_total_paid_minutes_used",
-            "Github Actions organisation billing total paid minutes used",
-            &["organisation"]
-        )
-        .unwrap();
-    pub static ref ORG_BILLING_ACTIONS_INCLUDED_MINUTES: IntGaugeVec = register_int_gauge_vec!(
+    pub static ref ORG_BILLING_ACTIONS_TOTAL_PAID_MINUTES_USED: GaugeVec = register_gauge_vec!(
+        "github_org_billing_actions_total_paid_minutes_used",
+        "Github Actions organisation billing total paid minutes used",
+        &["organisation"]
+    )
+    .unwrap();
+    pub static ref ORG_BILLING_ACTIONS_INCLUDED_MINUTES: GaugeVec = register_gauge_vec!(
         "github_org_billing_actions_included_minutes",
         "Github Actions organisation billing included minutes",
         &["organisation"]
     )
     .unwrap();
-    pub static ref ORG_BILLING_ACTIONS_MINUTES_USED_BREAKDOWN: IntGaugeVec =
-        register_int_gauge_vec!(
-            "github_org_billing_actions_minutes_used_breakdown",
-            "Github Actions organisation billing minutes breakdown",
-            &["organisation", "os"]
-        )
-        .unwrap();
+    pub static ref ORG_BILLING_ACTIONS_MINUTES_USED_BREAKDOWN: GaugeVec = register_gauge_vec!(
+        "github_org_billing_actions_minutes_used_breakdown",
+        "Github Actions organisation billing minutes breakdown",
+        &["organisation", "os"]
+    )
+    .unwrap();
     pub static ref ORG_BILLING_PACKAGES_TOTAL_GIGABYTES_BANDWIDTH_USED: GaugeVec =
         register_gauge_vec!(
             "github_org_billing_packages_total_gigabytes_bandwidth_used",
@@ -191,8 +192,8 @@ lazy_static! {
             &["organisation"]
         )
         .unwrap();
-    pub static ref ORG_BILLING_SHARED_STORAGE_DAYS_LEFT_IN_BILLING_CYCLE: IntGaugeVec =
-        register_int_gauge_vec!(
+    pub static ref ORG_BILLING_SHARED_STORAGE_DAYS_LEFT_IN_BILLING_CYCLE: GaugeVec =
+        register_gauge_vec!(
             "github_org_billing_shared_storage_days_left_in_billing_cycle",
             "Github Shared Storage organisation billing days left in billing cycle",
             &["organisation"]

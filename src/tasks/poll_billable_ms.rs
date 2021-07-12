@@ -1,5 +1,5 @@
 use lazy_static::lazy_static;
-use prometheus::{register_int_gauge_vec, IntGaugeVec};
+use prometheus::{register_gauge_vec, GaugeVec};
 use serde::Deserialize;
 use std::{collections::HashMap, sync::Arc, time::Duration};
 use tokio::{sync::RwLock, time};
@@ -89,11 +89,11 @@ pub struct Billable {
 #[derive(Debug, Deserialize)]
 #[non_exhaustive]
 pub struct BillableTime {
-    pub total_ms: i64,
+    pub total_ms: f64,
 }
 
 lazy_static! {
-    pub static ref ACTIONS_BILLABLE_MS: IntGaugeVec = register_int_gauge_vec!(
+    pub static ref ACTIONS_BILLABLE_MS: GaugeVec = register_gauge_vec!(
         "github_actions_billable_ms",
         "Github Actions billable milliseconds",
         &["owner", "repository", "workflow", "os"]
