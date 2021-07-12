@@ -64,7 +64,7 @@ jobs:
         with:
           key: "${{ matrix.target }}"
       - run: cargo install cross --version 0.2.1
-        if: ${{ steps.rust-cache.outputs.cache-hit == false }}
+        if: ${{ steps.rust-cache.outputs.cache-hit != 'true' }}
       - run: cross build --release --target ${{ matrix.target }}
       - uses: actions/upload-artifact@v2
         with:
