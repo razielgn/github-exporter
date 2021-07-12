@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - "**"
-    tags-ignore:
+    tags:
       - "**.**.**"
 
 name: build
@@ -72,6 +72,7 @@ jobs:
           path: "target/${{ matrix.target }}/release/github-exporter"
 
   build-docker-image:
+    if: "${{ startsWith(github.event.ref, 'refs/tags/') }}"
     runs-on: ubuntu-latest
     needs: build-cross
     strategy:
@@ -100,15 +101,18 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
+      - id: tag
+        run: echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
       - uses: docker/build-push-action@v2
         with:
-          tags: "razielgn/github-exporter:latest-${{ matrix.tag-suffix }}"
+          tags: "razielgn/github-exporter:${{ steps.tag.outputs.TAG}}-${{ matrix.tag-suffix }},razielgn/github-exporter:latest-${{ matrix.tag-suffix }}"
           context: "target/${{ matrix.target }}/release"
           platforms: "${{ matrix.docker-platform }}"
           file: ci/dockerfiles/Dockerfile.ci-release
           push: true
 
   build-docker-manifest:
+    if: "${{ startsWith(github.event.ref, 'refs/tags/') }}"
     runs-on: ubuntu-latest
     needs: build-docker-image
     steps:
@@ -124,5 +128,14 @@ jobs:
             razielgn/github-exporter:latest-linux-armv7 \
             razielgn/github-exporter:latest-linux-armv8
       - run: docker manifest push razielgn/github-exporter:latest
+      - id: tag
+        run: echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
+      - run: |
+          docker manifest create \
+            razielgn/github-exporter:${{ steps.tag.outputs.TAG }} \
+            razielgn/github-exporter:${{ steps.tag.outputs.TAG }}-linux-amd64 \
+            razielgn/github-exporter:${{ steps.tag.outputs.TAG }}-linux-armv7 \
+            razielgn/github-exporter:${{ steps.tag.outputs.TAG }}-linux-armv8
+      - run: docker manifest push razielgn/github-exporter:${{ steps.tag.outputs.TAG }}
 
   # TODO: peter-evans/dockerhub-description@v2
